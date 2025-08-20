@@ -8,23 +8,32 @@ using ToDo.Domain.Enums;
 
 namespace ToDo.Application.Contracts.Services.Implementations;
 
-public class ToDoItemService(IBaseRepository<ToDoItem> toItemRepository, IValidator<CreateModel> createValidation) : IToDoItemService
+public class ToDoItemService(
+    IBaseRepository<ToDoItem> toItemRepository,
+    IValidator<CreateModel> createValidation,
+    IValidator<ChangeTaskStatusModel> changeTaskModelValidator,
+    IValidator<FilterModel> filterModelValidator,
+    IValidator<SortModel> sortModelValidator) : IToDoItemService
 {
     private readonly IBaseRepository<ToDoItem> _toDoItemRepository = toItemRepository;
     private readonly IValidator<CreateModel> _createValidaton = createValidation;
-    public void ChangeTaskStatus(long id, Status status)
+    private readonly IValidator<ChangeTaskStatusModel> _changeTaskModelvalidator = changeTaskModelValidator;
+    private readonly IValidator<FilterModel> _filterModelValidator = filterModelValidator;
+    private readonly IValidator<SortModel> _sortModelValidator = sortModelValidator;
+    public async Task ChangeTaskStatus(ChangeTaskStatusModel model)
     {
-        try
+        var validationResult = await _changeTaskModelvalidator.ValidateAsync(model);
+        if (!validationResult.IsValid)
         {
-            var item = _toDoItemRepository.ViewAllValues().Where(x => x.Id == id).FirstOrDefault();
-            if (item is null) throw new ExistException($"Item with id: {id} is not exist");
-            item.Status = status;
-            _toDoItemRepository.Save();
+            foreach (var err in validationResult.Errors)
+            {
+                throw new ValidationFailed(err.ErrorMessage);
+            }
         }
-        catch (ExistException e)
-        {
-            throw new Exception(e.Message);
-        }
+        var item = _toDoItemRepository.ViewAllValues().Where(x => x.Id == model.Id).FirstOrDefault();
+        if (item is null) throw new ExistException($"Item with id: {model.Id} is not exist");
+        item.Status = model.Status;
+        _toDoItemRepository.Save();
     }
     public async Task CreateItem(CreateModel model)
     {
@@ -56,13 +65,9 @@ public class ToDoItemService(IBaseRepository<ToDoItem> toItemRepository, IValida
             _toDoItemRepository.AddTask(newItem);
             _toDoItemRepository.Save();
         }
-        catch (ValidationFailed e)
-        {
-            Console.WriteLine(e.Message);
-        }
         catch (ExistException e)
         {
-            throw new ExistException(e.Message);
+            Console.WriteLine(e.Message);
         }
     }
     private void CheckToDoItemExist(string name)
@@ -72,59 +77,83 @@ public class ToDoItemService(IBaseRepository<ToDoItem> toItemRepository, IValida
     }
     public void DeleteItem(long id)
     {
-        try
-        {
-            var item = _toDoItemRepository.ViewAllValues().Where(x => x.Id == id).FirstOrDefault();
-            if (item is null) throw new ExistException($"Item with id: {id} is not exist");
-            _toDoItemRepository.DeleteTask(item);
-            _toDoItemRepository.Save();
-        }
-        catch (ExistException e)
-        {
-            throw new ExistException(e.Message);
-        }
+        if (id < 0) throw new IdIsNotCorrectFromatException($"Id: {id} must be greater than 0");
+        var item = _toDoItemRepository.ViewAllValues().Where(x => x.Id == id).FirstOrDefault();
+        if (item is null) throw new ExistException($"Item with id: {id} is not exist");
+        _toDoItemRepository.DeleteTask(item);
+        _toDoItemRepository.Save();
+
+
     }
-    public List<ToDoItemDto> Filter(FilterModel sortModel)
+    public async Task<List<ToDoItemDto>> Filter(FilterModel sortModel)
     {
+        var validationResult = await _filterModelValidator.ValidateAsync(sortModel);
+        if (!validationResult.IsValid)
+        {
+            foreach (var err in validationResult.Errors)
+            {
+                throw new ValidationFailed(err.ErrorMessage);
+            }
+        }
+
         var items = _toDoItemRepository.ViewAllValues().Where(x => x.Status == sortModel.Status).ToList();
+        if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
-    public List<ToDoItemDto> Sort(SortModel sortModel)
+    public async Task<List<ToDoItemDto>> Sort(SortModel sortModel)
     {
-        if (sortModel.DueDate is not null)
-            return GetByTasksByDueDate(sortModel.DueDate);
-        if (sortModel.Priority is not null)
-            return GetTasksByPriority(sortModel.Priority);
+        try
+        {
+            var validatonResult = await _sortModelValidator.ValidateAsync(sortModel);
+            if (!validatonResult.IsValid)
+            {
+                foreach (var err in validatonResult.Errors)
+                {
+                    throw new ValidationFailed(err.ErrorMessage);
+                }
+            }
+            if (sortModel.DueDate is not null)
+                return GetByTasksByDueDate(sortModel.DueDate);
+            if (sortModel.Priority is not null)
+                return GetTasksByPriority(sortModel.Priority);
 
+        }
+        catch (CollectionCountIsZero e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error: " + e.Message);
+            Console.ResetColor();
+        }
         return new List<ToDoItemDto>();
     }
     private List<ToDoItemDto> GetTasksByPriority(Priority? priority)
     {
         var items = _toDoItemRepository.ViewAllValues().Where(x => x.Priority == priority).ToList();
-        if (items.Count == 0)
-            return new List<ToDoItemDto>();
+        if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
     private List<ToDoItemDto> GetByTasksByDueDate(DateTime? dueDate)
     {
-        var items = _toDoItemRepository.ViewAllValues().Where(x => x.DueDate == dueDate || x.DueDate <= DateTime.Now).ToList();
-        if (items.Count == 0)
-            return new List<ToDoItemDto>();
+        var items = _toDoItemRepository.ViewAllValues().Where(x => x.DueDate <= dueDate).ToList();
+        if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
     public List<ToDoItemDto> ViewAllTasks()
     {
         var items = _toDoItemRepository.ViewAllValues().ToList();
+        if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
     public List<ToDoItemDto> ViewOverdueTasks()
     {
         var items = _toDoItemRepository.ViewAllValues().Where(x => x.DueDate < DateTime.Now).ToList();
+        if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
     public List<ToDoItemDto> ViewTasksByCategory(Category category)
     {
         var items = _toDoItemRepository.ViewAllValues().Where(x => x.Category == category).ToList();
+        if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
     private List<ToDoItemDto> ConvertToDto(List<ToDoItem> list)
