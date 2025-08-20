@@ -23,7 +23,7 @@ async Task ShowInterface()
     while (true)
     {
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Hi there! By using this project, you can manage your plans more organized and reliable. The following actions and commands are required to use the project:\r\nEXIT - returns back\r\nSelect the desired action by selecting the list numbers. For example:\r\n1. Get\r\n2. Add\r\n3. Delete\r\nInput: 1\r\nThis will execute the get action");
+        Console.WriteLine("Hi there! By using this project, you can manage your plans more organized and reliable. The following actions and commands are required to use the project:\r\nEXIT - goes back. For example:\r\nInput: exit or EXIT\r\n\r\nSelect the desired action by selecting the list numbers. For example:\r\n1. Get\r\n2. Add\r\n3. Delete\r\nInput: 1\r\nThis will execute the get action\r\nGood luck :)");
         Console.ResetColor();
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("1. Add Task");
