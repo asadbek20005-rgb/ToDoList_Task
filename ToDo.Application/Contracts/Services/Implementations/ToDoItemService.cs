@@ -70,7 +70,7 @@ public class ToDoItemService(
             Console.WriteLine(e.Message);
         }
     }
-    private void CheckToDoItemExist(string name)
+    public void CheckToDoItemExist(string name)
     {
         var exist = _toDoItemRepository.ViewAllValues().Any(x => x.Name == name);
         if (exist) throw new ExistException($"To do item with {name} is already exist");
@@ -126,13 +126,13 @@ public class ToDoItemService(
         }
         return new List<ToDoItemDto>();
     }
-    private List<ToDoItemDto> GetTasksByPriority(Priority? priority)
+    public List<ToDoItemDto> GetTasksByPriority(Priority? priority)
     {
         var items = _toDoItemRepository.ViewAllValues().Where(x => x.Priority == priority).ToList();
         if (items.Count == 0) throw new CollectionCountIsZero();
         return ConvertToDto(items);
     }
-    private List<ToDoItemDto> GetByTasksByDueDate(DateTime? dueDate)
+    public List<ToDoItemDto> GetByTasksByDueDate(DateTime? dueDate)
     {
         var items = _toDoItemRepository.ViewAllValues().Where(x => x.DueDate <= dueDate).ToList();
         if (items.Count == 0) throw new CollectionCountIsZero();
