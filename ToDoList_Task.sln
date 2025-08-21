@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDo.Domain", "ToDo.Domain\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDo.Presentation", "ToDo.Presentation\ToDo.Presentation.csproj", "{DF71350C-AA26-4349-9E65-8E5E6091AA73}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDo.XUnit", "ToDo.XUnit\ToDo.XUnit.csproj", "{33E26343-AF78-4413-BE84-FF3F6EE3F6D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,9 +37,16 @@ Global
 		{DF71350C-AA26-4349-9E65-8E5E6091AA73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF71350C-AA26-4349-9E65-8E5E6091AA73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF71350C-AA26-4349-9E65-8E5E6091AA73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33E26343-AF78-4413-BE84-FF3F6EE3F6D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33E26343-AF78-4413-BE84-FF3F6EE3F6D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33E26343-AF78-4413-BE84-FF3F6EE3F6D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33E26343-AF78-4413-BE84-FF3F6EE3F6D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{33E26343-AF78-4413-BE84-FF3F6EE3F6D9} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3D59265B-805E-4644-A273-890097C4CEF6}

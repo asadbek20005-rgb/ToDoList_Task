@@ -5,12 +5,16 @@ namespace ToDo.Infrastructure.Persistence.Repositories;
 
 public class BaseRepository<T> : IBaseRepository<T> where T : class
 {
-    private const string _filePath = @"C:\Users\sherm\OneDrive\Desktop\.Net Projects\ToDoList_Task\ToDo.Infrastructure\Persistence\FileDb\tasks.json";
+
+    private readonly string _filePath;
+
+
     private readonly List<T> _values;
 
     public BaseRepository()
     {
-        if (File.Exists(_filePath))
+
+        if (Directory.Exists(_filePath))
         {
             var json = File.ReadAllText(_filePath);
             _values = JsonSerializer.Deserialize<List<T>>(json) ?? new List<T>();
@@ -18,6 +22,9 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         else
         {
             _values = new List<T>();
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+            _filePath = Path.Combine(appDirectory, "tasks.json");
         }
     }
     public void AddTask(T value) => _values.Add(value);
@@ -26,13 +33,14 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     public void Save()
     {
         var json = JsonSerializer.Serialize(_values, new JsonSerializerOptions { WriteIndented = true });
+
         File.WriteAllText(_filePath, json);
     }
 
     public void UpdateTask(T value)
     {
         string updatedJson = JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = true });
-            
+
         File.WriteAllText(_filePath, updatedJson);
     }
 
