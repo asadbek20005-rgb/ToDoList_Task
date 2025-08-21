@@ -38,7 +38,7 @@ async Task ShowInterface()
         Console.WriteLine("8. Overdue Tasks");
         Console.ResetColor();
 
-        Console.Write("Select: ");
+        Console.Write("Input: ");
 
 
         var choice = Console.ReadLine();
@@ -115,7 +115,7 @@ async Task Sort()
         var choice = Console.ReadLine();
         if (choice.ToLower().Equals("exit"))
         {
-            await Back();
+            break;
         }
 
         switch (choice)
@@ -239,7 +239,7 @@ async Task Filter()
         var choice = Console.ReadLine();
         if (choice.ToLower().Equals("exit"))
         {
-            await Back();
+            break;
         }
         switch (choice)
         {
@@ -520,7 +520,7 @@ async Task AddTask()
             }
             model.Description = des;
 
-            Console.Write("Enter due date name: ");
+            Console.Write("Enter due date like this (year-month-day): ");
             var dueDateValue = Console.ReadLine();
             if (dueDateValue.ToLower().Equals("exit"))
             {
